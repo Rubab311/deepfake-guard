@@ -1,4 +1,5 @@
 # DeepFake Guard
+
 AI-powered deepfake detection for images and videos — built with FastAPI, PyTorch, React, and TailwindCSS.
 
 [![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
@@ -7,6 +8,10 @@ AI-powered deepfake detection for images and videos — built with FastAPI, PyTo
 [![React](https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
 [![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![Railway](https://img.shields.io/badge/Railway-0B0D0E?style=for-the-badge&logo=railway&logoColor=white)](https://railway.app/)
+[![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://vercel.com/)
+
+---
 
 ## Features
 
@@ -19,7 +24,7 @@ AI-powered deepfake detection for images and videos — built with FastAPI, PyTo
 - **Login/Signup forms** (frontend UI ready, backend auth TBD)
 - **Cyber Laws page** — laws by country (PK, US, UK, IN, EU) with direct complaint links
 - **Help & Support page** — step-by-step abuse response guide + crisis hotlines
-- **Deploy-ready** for Render (backend) + Vercel (frontend)
+- **Deploy-ready** for Railway (backend) + Vercel (frontend)
 
 ---
 
@@ -30,6 +35,8 @@ deepfake-guard/
 ├── backend/
 │   ├── main.py                   # FastAPI app + /api/analyze endpoint
 │   ├── train.py                  # Model training script
+│   ├── start.py                  # Railway startup script (auto-downloads model weights)
+│   ├── nixpacks.toml             # Railway Nixpacks build config
 │   ├── services/
 │   │   └── analyzer.py           # Full detection pipeline
 │   ├── models/
@@ -37,7 +44,8 @@ deepfake-guard/
 │   │   └── README.md             # Model weights guide
 │   ├── utils/
 │   │   ├── config.py             # Env-based configuration
-│   │   └── prompts.py            # Label templates
+│   │   ├── prompts.py            # Label templates
+│   │   └── download_dataset.py   # Auto-download datasets from Hugging Face
 │   ├── requirements.txt
 │   └── .env.example
 │
@@ -65,18 +73,17 @@ deepfake-guard/
 │       │   ├── Analyze.jsx
 │       │   ├── About.jsx
 │       │   ├── FAQ.jsx
+│       │   ├── CyberLaws.jsx
+│       │   ├── Help.jsx
 │       │   ├── Login.jsx
 │       │   └── Signup.jsx
 │       └── services/
-│           └── api.js            # Axios-based API client
+│           └── api.js            # API client with progress tracking
 │
 ├── datasets/
 │   ├── README.md                 # Dataset sources + setup guide
-│   └── sample_data/              # Tiny placeholder images for CI
+│   └── sample_data/              # Placeholder images for testing
 │
-├── Dockerfile                    # Multi-stage build
-├── .dockerignore
-├── render.yaml                   # Render deployment config
 └── .gitignore
 ```
 
@@ -88,23 +95,27 @@ deepfake-guard/
 
 - Python 3.11+
 - Node.js 20+
-- (Optional) Docker Desktop
 
-### 1 — Clone and set up environment
+### 1 — Clone the repository
 
 ```bash
-git clone https://github.com/yourname/deepfake-guard.git
+git clone https://github.com/Rubab311/deepfake-guard.git
 cd deepfake-guard
 ```
 
-### 2 — Backend
+### 2 — Backend setup
 
 ```bash
 cd backend
 
 # Create virtual environment
 python -m venv .venv
-source .venv/bin/activate   # Windows: .venv\Scripts\activate
+
+# Activate it
+# Windows:
+.venv\Scripts\activate
+# Mac/Linux:
+source .venv/bin/activate
 
 # Install dependencies (CPU-only PyTorch)
 pip install -r requirements.txt
@@ -119,16 +130,16 @@ uvicorn main:app --reload --port 8080
 
 API docs available at: http://localhost:8080/docs
 
-### 3 — Frontend
+### 3 — Frontend setup
 
 ```bash
 cd frontend
 
 npm install
 
-# Copy and edit env
+# Copy and configure env
 cp .env.example .env.local
-# VITE_API_URL=http://localhost:8080
+# Set VITE_API_URL=http://localhost:8080
 
 npm run dev
 ```
@@ -137,84 +148,109 @@ Frontend available at: http://localhost:5173
 
 ---
 
-## Training the Model
+## Dataset Download & Model Training
 
-Download a dataset first (see `datasets/README.md`), then:
+### Download datasets (auto from Hugging Face)
 
 ```bash
 cd backend
 
-# Basic training (EfficientNet, 20 epochs)
+# Quick test (~300 MB)
+python utils/download_dataset.py --dataset deepfake-v3
+
+# Recommended for proper training (~3 GB, 32k images, 40 techniques)
+python utils/download_dataset.py --dataset df40-classification
+
+# Download everything and merge
+python utils/download_dataset.py --dataset all
+```
+
+### Train the model
+
+```bash
+# Basic training (EfficientNet, recommended)
 python train.py --model efficientnet --epochs 20 --batch 32
 
-# With custom data directory
-python train.py --model efficientnet --data_dir /path/to/dataset --epochs 30
+# Train longer for better accuracy
+python train.py --model efficientnet --epochs 50 --batch 32
 
-# All options
+# Try ViT transformer model
+python train.py --model vit --epochs 25 --batch 16
+
+# See all options
 python train.py --help
 ```
 
 Trained weights are saved to `backend/models/deepfake_efficientnet.pth`.
 
----
-
-## Docker
-
-```bash
-# Build
-docker build -t deepfake-guard .
-
-# Run
-docker run -p 8080:8080 \
-  -e CORS_ORIGINS="http://localhost:5173" \
-  deepfake-guard
-
-# With model weights mounted
-docker run -p 8080:8080 \
-  -v $(pwd)/backend/models:/app/models \
-  deepfake-guard
-```
+> **Tip:** After training, upload the `.pth` file to your Hugging Face model repo. The backend will auto-download it on startup via `start.py`.
 
 ---
 
 ## Deployment
 
-### Option A — Full-stack on Render (backend serves frontend)
+This project is deployed as two separate services:
 
-1. Push code to GitHub
-2. Create a new **Web Service** on [Render](https://render.com)
-3. Select your repo → Render detects `render.yaml` automatically
-4. Set environment variables in the Render dashboard:
-   - `CORS_ORIGINS` → your Vercel URL (if using Option B) or `*`
-   - `MODEL_PATH` → path to mounted model weights
-5. Deploy!
+| Service | Platform | Purpose |
+|---|---|---|
+| Backend (FastAPI) | Railway | REST API + AI inference |
+| Frontend (React) | Vercel | Static site + CDN |
+| Model Weights | Hugging Face Hub | Auto-downloaded on Railway boot |
 
-> **Note**: Mount model weights via a Render Disk or download them in a start script.
+### Backend — Railway
 
-### Option B — Split deploy (Vercel frontend + Render backend)
+1. Push your code to GitHub
+2. Go to [railway.app](https://railway.app) → **New Project** → **Deploy from GitHub repo**
+3. Select your repo
+4. Set **Root Directory** to `backend`
+5. Leave Build and Start commands empty — Railway reads `nixpacks.toml` automatically
+6. Add environment variables in the Railway dashboard:
 
-1. **Backend**: Follow Option A above
-2. **Frontend**: Push the `frontend/` folder to a new GitHub repo (or monorepo)
-3. Import into [Vercel](https://vercel.com) → Framework: Vite
-4. Set `VITE_API_URL` = your Render backend URL
-5. Deploy!
+```
+PORT=8080
+MODEL_TYPE=efficientnet
+MODEL_PATH=models/deepfake_efficientnet.pth
+DEVICE=cpu
+MAX_FILE_SIZE_MB=50
+DEEPFAKE_THRESHOLD=0.5
+CORS_ORIGINS=https://your-app.vercel.app
+```
 
-This gives the fastest cold starts because the static frontend is served from Vercel's CDN.
+7. Go to **Settings → Networking → Generate Domain** to get your backend URL
+8. Deploy!
+
+> **How model weights work:** `start.py` runs on boot and automatically downloads your trained `.pth` file from Hugging Face Hub before starting the server. No manual file uploads needed.
+
+### Frontend — Vercel
+
+1. Go to [vercel.com](https://vercel.com) → **New Project** → Import your GitHub repo
+2. Set **Root Directory** to `frontend`
+3. Add environment variable before deploying:
+
+```
+VITE_API_URL=https://your-railway-url.up.railway.app
+```
+
+4. Click **Deploy** — done in ~2 minutes!
+
+> Every time you push to GitHub, both Railway and Vercel automatically redeploy. No manual steps needed.
 
 ---
 
-## 🔌 API Reference
+## API Reference
 
 ### `POST /api/analyze`
 
 Upload an image or video for deepfake detection.
 
-**Request**: `multipart/form-data`
+**Request:** `multipart/form-data`
+
 | Field | Type | Description |
 |---|---|---|
 | `file` | `UploadFile` | Image (jpg/png/webp) or video (mp4/avi/mov), max 50 MB |
 
 **Response** `200 OK`:
+
 ```json
 {
   "filename": "photo.jpg",
@@ -246,7 +282,7 @@ Upload an image or video for deepfake detection.
 
 ## Configuration
 
-All settings are managed via environment variables (`.env`):
+All settings managed via environment variables in `.env` (local) or Railway dashboard (production):
 
 | Variable | Default | Description |
 |---|---|---|
@@ -257,7 +293,7 @@ All settings are managed via environment variables (`.env`):
 | `DEVICE` | `cpu` | `cpu` or `cuda` |
 | `MAX_FILE_SIZE_MB` | `50` | Upload size limit |
 | `DEEPFAKE_THRESHOLD` | `0.5` | Score threshold for FAKE verdict |
-| `CORS_ORIGINS` | `http://localhost:5173` | Allowed CORS origins |
+| `CORS_ORIGINS` | `http://localhost:5173` | Allowed CORS origins (set to Vercel URL in production) |
 
 ---
 
@@ -266,18 +302,45 @@ All settings are managed via environment variables (`.env`):
 | Layer | Technology |
 |---|---|
 | Frontend | React 18, Vite 5, TailwindCSS 3, React Router 6, Lucide Icons |
-| Backend | FastAPI, Uvicorn, Python 3.11 |
-| AI/ML | PyTorch (CPU), torchvision, EfficientNet/ResNet/ViT |
+| Backend | FastAPI, Uvicorn, Python 3.13 |
+| AI/ML | PyTorch (CPU), torchvision, EfficientNet / ResNet / ViT |
 | Vision | OpenCV (headless), Pillow |
-| Deployment | Docker, Render (backend), Vercel (frontend) |
+| Datasets | Hugging Face Hub (DF40, Celeb-DF v2, FaceForensics++) |
+| Backend Hosting | Railway (Nixpacks, free tier) |
+| Frontend Hosting | Vercel (global CDN, auto-deploy) |
+| Model Storage | Hugging Face Hub |
+
+---
+
+## Improving Model Accuracy
+
+To improve detection accuracy over time:
+
+```bash
+# Download more data
+python utils/download_dataset.py --dataset all
+
+# Train with more epochs
+python train.py --model efficientnet --epochs 50 --batch 32
+
+# Try a more powerful model
+python train.py --model vit --epochs 25 --batch 16
+```
+
+For fastest training, use **Google Colab** with a free T4 GPU:
+1. Go to [colab.research.google.com](https://colab.research.google.com)
+2. Runtime → Change Runtime → **T4 GPU**
+3. Upload `train.py` and `requirements.txt`
+4. Run training with `--device cuda --batch 64`
+5. Download the `.pth` file and upload to Hugging Face Hub
+
+Railway will automatically use the new weights on next restart.
 
 ---
 
 ## Disclaimer
 
-DeepFake Guard is an educational and research tool.
-Detection accuracy is not 100%. Do not use as the sole basis for legal, forensic, or journalistic decisions.
-Always combine AI analysis with critical thinking and additional evidence.
+DeepFake Guard is an educational and research tool. Detection accuracy is not 100%. Do not use as the sole basis for legal, forensic, or journalistic decisions. Always combine AI analysis with critical thinking and additional evidence.
 
 ---
 
