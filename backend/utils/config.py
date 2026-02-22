@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     CORS_ORIGINS: List[str] = [
         "http://localhost:5173",   # Vite dev
         "http://localhost:3000",
+        "https://deepfake-guard-flax.vercel.app",
         "https://*.vercel.app",    # Vercel preview
     ]
 
