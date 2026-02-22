@@ -32,7 +32,7 @@ class Settings(BaseSettings):
 
     # ── Detection ─────────────────────────────────────────────────────────────
     FACE_DETECTION_CONFIDENCE: float = 0.5
-    DEEPFAKE_THRESHOLD: float = 0.5    # Score > 0.5 → FAKE
+    DEEPFAKE_THRESHOLD: float = 0.35    # Score > 0.35 → FAKE
 
     class Config:
         env_file = ".env"
