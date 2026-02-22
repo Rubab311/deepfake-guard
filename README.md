@@ -15,8 +15,9 @@ AI-powered deepfake detection for images and videos — built with FastAPI, PyTo
 
 ## Features
 
-- **Face detection** via OpenCV Haar cascade
-- **CNN inference** with EfficientNet-B0, ResNet-50, or ViT-B/16
+- **Face detection** via OpenCV DNN (deep learning-based, with Haar cascade fallback)
+- **CNN inference** with EfficientNet-B0, ResNet-50, or ViT-B/16 (custom trained)
+- **Pretrained deepfake detector** via HuggingFace ViT — no training required
 - **Detailed breakdown** — face consistency, texture artifacts, blending boundaries, frequency anomalies
 - **Camera capture** — take a live snapshot directly in the browser
 - **File upload** — images (JPG, PNG, WEBP) and videos (MP4, AVI, MOV)
@@ -28,19 +29,56 @@ AI-powered deepfake detection for images and videos — built with FastAPI, PyTo
 
 ---
 
+## AI Model
+
+DeepFake Guard supports two modes for deepfake detection:
+
+### Option A — Pretrained HuggingFace Model (default, recommended)
+
+The default setup uses [`dima806/deepfake_vs_real_image_detection`](https://huggingface.co/dima806/deepfake_vs_real_image_detection), a Vision Transformer (ViT) trained on ~190,000 real and fake face images.
+
+**Advantages:**
+- No training required — works immediately after deployment
+- High accuracy out of the box
+- Automatically downloaded from HuggingFace on first request and cached to `/tmp/hf_cache`
+
+**How it works:**
+- `models/deepfake_model.py` loads the ViT model via the `transformers` library
+- `start.py` sets up the HuggingFace cache directory and starts the server — no `.pth` download needed
+- First inference request after deployment takes ~15 seconds to download and cache the model
+
+### Option B — Custom Trained Model
+
+You can train your own EfficientNet-B0, ResNet-50, or ViT-B/16 model on a deepfake dataset and use those weights instead.
+
+**When to use this:**
+- You want to fine-tune on a specific type of deepfake
+- You have domain-specific training data
+- You want full control over the model architecture
+
+**How it works:**
+- Run `train.py` to produce `models/deepfake_efficientnet.pth`
+- Upload the `.pth` file to your Hugging Face model repo (`Rubab311/deepfake-guard-weights`)
+- `start.py` downloads it automatically on Railway startup
+- Set `MODEL_TYPE=efficientnet` (or `resnet` / `vit`) in your Railway environment variables
+
+> **Note:** Custom-trained models require a sufficiently large and balanced dataset (we recommend DF40 or FaceForensics++, ~10,000+ images minimum) and enough training epochs to avoid overfitting. An AUC of 1.0 during training is a sign of overfitting — aim for 0.85–0.95 on validation.
+
+---
+
 ## Project Structure
 
 ```
 deepfake-guard/
 ├── backend/
 │   ├── main.py                   # FastAPI app + /api/analyze endpoint
-│   ├── train.py                  # Model training script
-│   ├── start.py                  # Railway startup script (auto-downloads model weights)
+│   ├── train.py                  # Model training script (Option B)
+│   ├── start.py                  # Railway startup script
 │   ├── nixpacks.toml             # Railway Nixpacks build config
 │   ├── services/
 │   │   └── analyzer.py           # Full detection pipeline
 │   ├── models/
-│   │   ├── deepfake_model.py     # EfficientNet / ResNet / ViT definitions
+│   │   ├── deepfake_model.py     # Pretrained HF model + EfficientNet / ResNet / ViT definitions
 │   │   └── README.md             # Model weights guide
 │   ├── utils/
 │   │   ├── config.py             # Env-based configuration
@@ -150,6 +188,8 @@ Frontend available at: http://localhost:5173
 
 ## Dataset Download & Model Training
 
+> This section applies to **Option B (custom trained model)** only. Skip if using the default pretrained HuggingFace model.
+
 ### Download datasets (auto from Hugging Face)
 
 ```bash
@@ -195,7 +235,8 @@ This project is deployed as two separate services:
 |---|---|---|
 | Backend (FastAPI) | Railway | REST API + AI inference |
 | Frontend (React) | Vercel | Static site + CDN |
-| Model Weights | Hugging Face Hub | Auto-downloaded on Railway boot |
+| Pretrained Model | Hugging Face Hub | Auto-downloaded on first request (Option A) |
+| Custom Weights | Hugging Face Hub | Auto-downloaded on Railway boot (Option B) |
 
 ### Backend — Railway
 
@@ -209,17 +250,17 @@ This project is deployed as two separate services:
 ```
 PORT=8080
 MODEL_TYPE=efficientnet
-MODEL_PATH=models/deepfake_efficientnet.pth
+MODEL_PATH=/tmp/models/deepfake_efficientnet.pth
 DEVICE=cpu
 MAX_FILE_SIZE_MB=50
-DEEPFAKE_THRESHOLD=0.5
+DEEPFAKE_THRESHOLD=0.35
 CORS_ORIGINS=https://your-app.vercel.app
 ```
 
 7. Go to **Settings → Networking → Generate Domain** to get your backend URL
 8. Deploy!
 
-> **How model weights work:** `start.py` runs on boot and automatically downloads your trained `.pth` file from Hugging Face Hub before starting the server. No manual file uploads needed.
+> **Model on first request:** The pretrained HuggingFace model downloads and caches automatically on the first analyze request (~15 seconds). Subsequent requests are fast.
 
 ### Frontend — Vercel
 
@@ -288,11 +329,11 @@ All settings managed via environment variables in `.env` (local) or Railway dash
 |---|---|---|
 | `PORT` | `8080` | Server port |
 | `DEBUG` | `false` | Enable debug mode |
-| `MODEL_PATH` | `models/deepfake_efficientnet.pth` | Path to trained weights |
+| `MODEL_PATH` | `/tmp/models/deepfake_efficientnet.pth` | Path to custom trained weights (Option B only) |
 | `MODEL_TYPE` | `efficientnet` | `efficientnet` \| `resnet` \| `vit` |
 | `DEVICE` | `cpu` | `cpu` or `cuda` |
 | `MAX_FILE_SIZE_MB` | `50` | Upload size limit |
-| `DEEPFAKE_THRESHOLD` | `0.5` | Score threshold for FAKE verdict |
+| `DEEPFAKE_THRESHOLD` | `0.35` | Score threshold for FAKE verdict |
 | `CORS_ORIGINS` | `http://localhost:5173` | Allowed CORS origins (set to Vercel URL in production) |
 
 ---
@@ -303,8 +344,9 @@ All settings managed via environment variables in `.env` (local) or Railway dash
 |---|---|
 | Frontend | React 18, Vite 5, TailwindCSS 3, React Router 6, Lucide Icons |
 | Backend | FastAPI, Uvicorn, Python 3.13 |
-| AI/ML | PyTorch (CPU), torchvision, EfficientNet / ResNet / ViT |
-| Vision | OpenCV (headless), Pillow |
+| AI/ML (Pretrained) | HuggingFace Transformers, ViT (`dima806/deepfake_vs_real_image_detection`) |
+| AI/ML (Custom) | PyTorch (CPU), torchvision, EfficientNet / ResNet / ViT |
+| Vision | OpenCV DNN face detector, Pillow |
 | Datasets | Hugging Face Hub (DF40, Celeb-DF v2, FaceForensics++) |
 | Backend Hosting | Railway (Nixpacks, free tier) |
 | Frontend Hosting | Vercel (global CDN, auto-deploy) |
@@ -314,7 +356,23 @@ All settings managed via environment variables in `.env` (local) or Railway dash
 
 ## Improving Model Accuracy
 
-To improve detection accuracy over time:
+### Using the pretrained model (Option A)
+
+The pretrained model works well for most deepfakes. To improve results you can adjust the detection thresholds in `utils/config.py`:
+
+```python
+DEEPFAKE_THRESHOLD: float = 0.35   # lower = stricter (flags more as fake)
+```
+
+And in `services/analyzer.py`:
+```python
+def _score_to_verdict(self, score):
+    if score < 0.3:    # REAL
+    elif score < 0.45: # UNCERTAIN
+    else:              # FAKE
+```
+
+### Training a custom model (Option B)
 
 ```bash
 # Download more data
@@ -335,6 +393,15 @@ For fastest training, use **Google Colab** with a free T4 GPU:
 5. Download the `.pth` file and upload to Hugging Face Hub
 
 Railway will automatically use the new weights on next restart.
+
+---
+
+## Known Limitations
+
+- Faces covered by a niqab, mask, or heavy occlusion cannot be analyzed — a "No Face Detected" result will be returned
+- Side-profile or very small faces may not be detected
+- Highly realistic deepfakes may score in the "Uncertain" range rather than "Fake" — this is expected behavior for any deepfake detector
+- Detection accuracy is not 100% — always combine AI analysis with critical thinking
 
 ---
 
