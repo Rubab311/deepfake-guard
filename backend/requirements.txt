@@ -1,11 +1,10 @@
 # DeepFake Guard – Python 3.11+ requirements
-# CPU-only PyTorch for lightweight Docker/Render deployments
-# To use GPU: replace torch/torchvision lines with CUDA variants from https://pytorch.org
+# CPU-only PyTorch for lightweight Railway/Docker deployments
 
 # ── Web Framework ─────────────────────────────────────────────────────────────
 fastapi==0.115.12
 uvicorn[standard]==0.34.3
-python-multipart==0.0.20      # required for UploadFile
+python-multipart==0.0.20
 
 # ── Config ────────────────────────────────────────────────────────────────────
 pydantic-settings==2.9.1
@@ -19,11 +18,12 @@ Pillow==11.2.1
 torch==2.7.1+cpu
 torchvision==0.22.1+cpu
 
-# ── Training utilities ────────────────────────────────────────────────────────
-scikit-learn==1.6.1            # roc_auc_score — pre-built wheels for Python 3.13
-numpy==2.2.3
-tqdm==4.67.1                   # progress bars during training
+# ── HuggingFace (pretrained deepfake detector) ────────────────────────────────
+transformers==4.40.0
+huggingface_hub==0.32.4
 
-# ── Dataset download (used by utils/download_dataset.py) ─────────────────────
-datasets==3.6.0                # Hugging Face datasets library
-huggingface_hub==0.32.4        # HF Hub API (authentication, file download)
+# ── Utilities ─────────────────────────────────────────────────────────────────
+numpy==2.2.3
+scikit-learn==1.6.1
+tqdm==4.67.1
+datasets==3.6.0
