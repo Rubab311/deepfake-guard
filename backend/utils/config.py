@@ -25,7 +25,7 @@ class Settings(BaseSettings):
     MAX_FILE_SIZE_MB: int = 50
 
     # ── Model ─────────────────────────────────────────────────────────────────
-    MODEL_PATH: str = "models/deepfake_efficientnet.pth"
+    MODEL_PATH: str = "/tmp/models/deepfake_efficientnet.pth"
     MODEL_TYPE: str = "efficientnet"   # "efficientnet" | "resnet" | "vit"
     DEVICE: str = "cpu"                # CPU-only for Docker/Render
 
