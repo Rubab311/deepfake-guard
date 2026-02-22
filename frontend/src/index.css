@@ -1,0 +1,59 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply box-border;
+  }
+  body {
+    @apply font-sans antialiased bg-gray-950 text-gray-100 min-h-screen;
+  }
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { @apply bg-gray-900; }
+  ::-webkit-scrollbar-thumb { @apply bg-gray-600 rounded-full; }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center gap-2 px-6 py-3 bg-brand-600 hover:bg-brand-700
+           text-white font-semibold rounded-xl transition-all duration-200
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-outline {
+    @apply inline-flex items-center gap-2 px-6 py-3 border border-gray-600
+           hover:border-brand-500 text-gray-300 hover:text-white font-semibold
+           rounded-xl transition-all duration-200;
+  }
+  .card {
+    @apply bg-gray-900 border border-gray-800 rounded-2xl p-6;
+  }
+  .input {
+    @apply w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3
+           text-white placeholder-gray-500 focus:outline-none focus:border-brand-500
+           transition-colors duration-200;
+  }
+  .label {
+    @apply block text-sm font-medium text-gray-400 mb-1;
+  }
+}
+
+/* Glowing scan line animation */
+.scan-line {
+  background: linear-gradient(
+    transparent,
+    rgba(56, 189, 248, 0.3),
+    transparent
+  );
+  animation: scan 2.5s ease-in-out infinite;
+}
+
+@keyframes scan {
+  0%   { transform: translateY(-100%); }
+  100% { transform: translateY(400%); }
+}
+
+/* Risk meter gradient */
+.risk-gradient {
+  background: linear-gradient(to right, #22c55e, #eab308, #ef4444);
+}

@@ -1,0 +1,31 @@
+# render.yaml – Render deployment configuration
+# Push this file to GitHub, then connect the repo in the Render dashboard.
+# Render will auto-detect this file and configure the service.
+
+services:
+  - type: web
+    name: deepfake-guard
+    env: docker
+    dockerfilePath: ./Dockerfile
+    plan: free           # change to "starter" or higher for production
+    region: oregon
+
+    # Environment variables (set secrets in the Render dashboard, not here)
+    envVars:
+      - key: PORT
+        value: 8080
+      - key: DEBUG
+        value: false
+      - key: MODEL_TYPE
+        value: efficientnet
+      - key: DEVICE
+        value: cpu
+      - key: MAX_FILE_SIZE_MB
+        value: 50
+      - key: DEEPFAKE_THRESHOLD
+        value: "0.5"
+      # Set CORS_ORIGINS to your Vercel frontend URL in the dashboard:
+      # CORS_ORIGINS=https://your-app.vercel.app
+
+    healthCheckPath: /api/health
+    autoDeploy: true

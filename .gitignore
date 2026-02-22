@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+env/
+
+# Environment
+.env
+backend/.env
+frontend/.env.local
+frontend/.env.production
+
+# Model weights (large binary files)
+backend/models/*.pth
+backend/models/*.pt
+backend/models/*.onnx
+
+# Datasets (very large)
+datasets/train/
+datasets/val/
+datasets/test/
+!datasets/sample_data/
+!datasets/README.md
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+*.tar
+
+# Logs
+*.log
