@@ -20,8 +20,8 @@ logger = logging.getLogger(__name__)
 HF_USERNAME  = "Rubab311"
 HF_REPO      = "deepfake-guard-weights"
 MODEL_FILE   = "deepfake_efficientnet.pth"
-MODELS_DIR   = os.path.join(os.path.dirname(__file__), "models")
-MODEL_PATH   = os.path.join(MODELS_DIR, MODEL_FILE)
+MODELS_DIR = "/tmp/models"
+MODEL_PATH  = "/tmp/models/deepfake_efficientnet.pth"
 HF_REPO_ID   = f"{HF_USERNAME}/{HF_REPO}"
 
 
