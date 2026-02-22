@@ -152,9 +152,9 @@ class DeepfakeAnalyzer:
     # ── Verdict mapping ───────────────────────────────────────────────────────
 
     def _score_to_verdict(self, score: float) -> dict:
-        if score < 0.35:
+        if score < 0.3:
             return VERDICT_LABELS["REAL"]
-        elif score < 0.55:
+        elif score < 0.45:
             return VERDICT_LABELS["UNCERTAIN"]
         else:
             return VERDICT_LABELS["FAKE"]
