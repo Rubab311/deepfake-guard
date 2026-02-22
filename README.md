@@ -1,29 +1,29 @@
-# 🛡️ DeepFake Guard
+# DeepFake Guard
+AI-powered deepfake detection for images and videos — built with FastAPI, PyTorch, React, and TailwindCSS.
 
-> AI-powered deepfake detection for images and videos — built with FastAPI, PyTorch, React, and TailwindCSS.
+[![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![PyTorch](https://img.shields.io/badge/PyTorch-EE4C2C?style=for-the-badge&logo=pytorch&logoColor=white)](https://pytorch.org/)
+[![React](https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
+[![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 
-![DeepFake Guard](https://img.shields.io/badge/stack-FastAPI%20%7C%20PyTorch%20%7C%20React%20%7C%20Tailwind-blue)
-![Python](https://img.shields.io/badge/python-3.11%2B-green)
-![License](https://img.shields.io/badge/license-MIT-lightgrey)
+## Features
+
+- **Face detection** via OpenCV Haar cascade
+- **CNN inference** with EfficientNet-B0, ResNet-50, or ViT-B/16
+- **Detailed breakdown** — face consistency, texture artifacts, blending boundaries, frequency anomalies
+- **Camera capture** — take a live snapshot directly in the browser
+- **File upload** — images (JPG, PNG, WEBP) and videos (MP4, AVI, MOV)
+- **Dark-mode UI** — React + Vite + TailwindCSS
+- **Login/Signup forms** (frontend UI ready, backend auth TBD)
+- **Cyber Laws page** — laws by country (PK, US, UK, IN, EU) with direct complaint links
+- **Help & Support page** — step-by-step abuse response guide + crisis hotlines
+- **Deploy-ready** for Render (backend) + Vercel (frontend)
 
 ---
 
-## ✨ Features
-
-- 🔍 **Face detection** via OpenCV Haar cascade
-- 🧠 **CNN inference** with EfficientNet-B0, ResNet-50, or ViT-B/16
-- 📊 **Detailed breakdown** — face consistency, texture artifacts, blending boundaries, frequency anomalies
-- 📷 **Camera capture** — take a live snapshot directly in the browser
-- 📁 **File upload** — images (JPG, PNG, WEBP) and videos (MP4, AVI, MOV)
-- 🎨 **Dark-mode UI** — React + Vite + TailwindCSS
-- 🔐 **Login/Signup forms** (frontend UI ready, backend auth TBD)
-- ⚖️ **Cyber Laws page** — laws by country (PK, US, UK, IN, EU) with direct complaint links
-- 🆘 **Help & Support page** — step-by-step abuse response guide + crisis hotlines
-- ☁️ **Deploy-ready** for Render (backend) + Vercel (frontend)
-
----
-
-## 📁 Project Structure
+## Project Structure
 
 ```
 deepfake-guard/
@@ -82,7 +82,7 @@ deepfake-guard/
 
 ---
 
-## 🚀 Local Development
+## Local Development
 
 ### Prerequisites
 
@@ -137,7 +137,7 @@ Frontend available at: http://localhost:5173
 
 ---
 
-## 🧠 Training the Model
+## Training the Model
 
 Download a dataset first (see `datasets/README.md`), then:
 
@@ -158,7 +158,7 @@ Trained weights are saved to `backend/models/deepfake_efficientnet.pth`.
 
 ---
 
-## 🐳 Docker
+## Docker
 
 ```bash
 # Build
@@ -177,7 +177,7 @@ docker run -p 8080:8080 \
 
 ---
 
-## ☁️ Deployment
+## Deployment
 
 ### Option A — Full-stack on Render (backend serves frontend)
 
@@ -244,7 +244,7 @@ Upload an image or video for deepfake detection.
 
 ---
 
-## 🔧 Configuration
+## Configuration
 
 All settings are managed via environment variables (`.env`):
 
@@ -261,7 +261,7 @@ All settings are managed via environment variables (`.env`):
 
 ---
 
-## 📚 Tech Stack
+## Tech Stack
 
 | Layer | Technology |
 |---|---|
@@ -273,7 +273,7 @@ All settings are managed via environment variables (`.env`):
 
 ---
 
-## ⚠️ Disclaimer
+## Disclaimer
 
 DeepFake Guard is an educational and research tool.
 Detection accuracy is not 100%. Do not use as the sole basis for legal, forensic, or journalistic decisions.
@@ -281,6 +281,6 @@ Always combine AI analysis with critical thinking and additional evidence.
 
 ---
 
-## 📄 License
+## License
 
 MIT — see [LICENSE](LICENSE).
